@@ -19,7 +19,7 @@ public class Main {
         window.setResizable(true);
 
         // Window Title
-        window.setTitle("Barns Hut Algorithm");
+        window.setTitle("Nuclear Fission");
 
         // Addding the window to the window?
         GameWindow gameWindow = new GameWindow();

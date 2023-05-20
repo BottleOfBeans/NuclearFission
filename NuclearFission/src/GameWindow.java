@@ -34,11 +34,11 @@ public class GameWindow extends JPanel implements Runnable {
     Thread gameThread;
 
     // Game Values
-    int FPS = 60;
-    int steps = 7;
+    int FPS = 144;
+    int steps = 1;
 
-    static double zoomX = 0.5;
-    static double zoomY = 0.5;
+    static double zoomX = 0.7;
+    static double zoomY = 0.7;
 
     double zoomXOffset = 1.3;
     double zoomYOffset = 1.3;
@@ -62,16 +62,9 @@ public class GameWindow extends JPanel implements Runnable {
      * Particles!
      */
     public double MaximumVelocity = 5;
-    public double MaxParticle = 500; // Maximum particle amount
+    public double MaxParticle = 1; // Maximum particle amount
     public static ArrayList<Particle> particles = new ArrayList<Particle>(); // List containing all of the particles
 
-
-    /*
-     * Constraints :)
-     */
-    double diameter = 600/zoomX;
-
-    public Ellipse2D CircularContainer = new Ellipse2D.Double(gameWidth/2/zoomX - diameter/2, gameHeight/2/zoomY - diameter/2, diameter, diameter);
 
 
     // Loop that runs the thread, allows for it to sleep and start and ensures
@@ -127,14 +120,11 @@ public class GameWindow extends JPanel implements Runnable {
         AffineTransform oldTransform = graphics.getTransform();
         graphics.scale(zoomX, zoomY); // Zoomgin on two axis'!
 
-        graphics.setColor(Color.DARK_GRAY);
-        graphics.fill(CircularContainer);
-
         graphics.setColor(Color.white);
 
         for (Particle p : particles) {
             p.update(deltaTime);
-            graphics.fill(p.getParticle());   
+            graphics.fill((Shape) p.getParticle());   
         }
 
         graphics.setTransform(oldTransform); // Putting the locations of the objects to what they should be post zoom.
