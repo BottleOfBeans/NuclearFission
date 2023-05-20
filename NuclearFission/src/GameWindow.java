@@ -40,8 +40,8 @@ public class GameWindow extends JPanel implements Runnable {
     static double zoomX = 0.7;
     static double zoomY = 0.7;
 
-    double zoomXOffset = 1.3;
-    double zoomYOffset = 1.3;
+    static double zoomXOffset = 1.3;
+    static double zoomYOffset = 1.3;
     double deltaTime = 0;
 
     // Creating the game windows and setting up the settings
@@ -50,6 +50,7 @@ public class GameWindow extends JPanel implements Runnable {
         this.setBackground(Color.black);
         this.setDoubleBuffered(true);
         this.setFocusable(true);
+        this.addMouseListener(new MouseInput());
     }
 
     // Starting thread, managing frame updates
@@ -58,11 +59,12 @@ public class GameWindow extends JPanel implements Runnable {
         gameThread.start();
     }
 
+
     /*
      * Particles!
      */
-    public double MaximumVelocity = 5;
-    public double MaxParticle = 1; // Maximum particle amount
+    public double MaximumVelocity = 10;
+    public double MaxParticle = 100; // Maximum particle amount
     public static ArrayList<Particle> particles = new ArrayList<Particle>(); // List containing all of the particles
 
 
@@ -76,12 +78,18 @@ public class GameWindow extends JPanel implements Runnable {
          */
         Random rand = new Random();
 
+        double initialXPos = gameWidth/zoomX/2;
+        double initialYPos = gameHeight/zoomY/2;
+        
+        Particle initial_particle = new Particle(new Vector2(initialXPos, initialYPos),new Vector2(0,0), 0);
+        particles.add(initial_particle);
+
         // Creating a bunch of random particles with adjustment to zoom
-        for (int i = 0; i < MaxParticle; i++) {
-            double randomXPos =  rand.nextDouble(0 + gameWidth*zoomXOffset/2, gameWidth / zoomX - gameWidth*zoomXOffset/2); // gameWidth/zoomX / 2 ; (For Center)
-            double randomYPos =  rand.nextDouble(0 + gameHeight*zoomYOffset/2, gameHeight / zoomY - gameHeight*zoomYOffset/2); // gameHeight/zoomY / 2 ; (For Center)
-            particles.add(new Particle(new Vector2(randomXPos, randomYPos)));
-        }
+        // for (int i = 0; i < MaxParticle; i++) {
+        //     double randomXPos =  rand.nextDouble(0 + gameWidth*zoomXOffset/2, gameWidth / zoomX - gameWidth*zoomXOffset/2); // gameWidth/zoomX / 2 ; (For Center)
+        //     double randomYPos =  rand.nextDouble(0 + gameHeight*zoomYOffset/2, gameHeight / zoomY - gameHeight*zoomYOffset/2); // gameHeight/zoomY / 2 ; (For Center)
+        //     particles.add(new Particle(new Vector2(randomXPos, randomYPos),new Vector2(0,0), 5));
+        // }
 
         // Managing updates and FPS
         double drawInterval = 1000000000 / FPS;
@@ -124,7 +132,10 @@ public class GameWindow extends JPanel implements Runnable {
 
         for (Particle p : particles) {
             p.update(deltaTime);
-            graphics.fill((Shape) p.getParticle());   
+            graphics.setColor((Color) p.color);
+            if(!p.collided){
+                graphics.fill((Shape) p.getParticle());
+            }
         }
 
         graphics.setTransform(oldTransform); // Putting the locations of the objects to what they should be post zoom.
@@ -133,3 +144,4 @@ public class GameWindow extends JPanel implements Runnable {
     }
 
 }
+//hi

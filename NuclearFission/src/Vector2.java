@@ -39,6 +39,9 @@ public class Vector2 {
         x *= z;
         y *= z;
     }
+    public Vector2 returnAdd(Vector2 gVector){
+        return new Vector2(x + gVector.x, y + gVector.y);
+    }
     public Vector2 returnMultiply(double z){
         return new Vector2(x * z, y * z);
     }
