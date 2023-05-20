@@ -22,8 +22,8 @@ public class Vector2 {
         return (x*x + y*y);
     }
     public void addVector(Vector2 gVector){
-        x += gVector.x;
-        y += gVector.y;
+        this.x += gVector.x;
+        this.y += gVector.y;
     }
     public void subtractVector(Vector2 gVector){
         x -= gVector.x;
@@ -57,5 +57,8 @@ public class Vector2 {
     }
     public Vector2 returnSubtract(Vector2 gvector){
         return (new Vector2(this.x - gvector.x, this.y - gvector.y));
+    }
+    public void display(){
+        System.out.println("X: "+this.x+"   Y: " +this.y);
     }
 }

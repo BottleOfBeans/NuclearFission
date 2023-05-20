@@ -1,7 +1,6 @@
 import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.AffineTransform;
-import java.awt.geom.Ellipse2D;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.Random;
@@ -34,16 +33,19 @@ public class GameWindow extends JPanel implements Runnable {
     Thread gameThread;
 
     // Game Values
-    int FPS = 144;
-    int steps = 1;
+    int FPS = 60;
+    int steps = 2;
 
     static double zoomX = 0.7;
     static double zoomY = 0.7;
 
-    static double zoomXOffset = 1.3;
-    static double zoomYOffset = 1.3;
+    static double zoomXOffset = 0;
+    static double zoomYOffset = 0;
     double deltaTime = 0;
 
+    static double percent_uranium_235 = 40; // (%)
+
+    
     // Creating the game windows and setting up the settings
     public GameWindow() {
         this.setPreferredSize(new Dimension(gameWidth, gameHeight));
@@ -60,14 +62,23 @@ public class GameWindow extends JPanel implements Runnable {
     }
 
 
+    public void drawSlider(){
+
+    }
+
     /*
      * Particles!
      */
     public double MaximumVelocity = 10;
-    public double MaxParticle = 100; // Maximum particle amount
+    public double MaxParticle = 1000; // Maximum particle amount
     public static ArrayList<Particle> particles = new ArrayList<Particle>(); // List containing all of the particles
+    public static ArrayList<Particle> newParticles = new ArrayList<Particle>(); // List containing all of the particles
+    public static ArrayList<Particle> oldParticles = new ArrayList<Particle>(); // List containing all of the particles
 
-
+    /*
+     * Quadtree
+     */
+    public static Branch QuadTree = new Branch(new Rectangle2D.Double(0,0,gameHeight,gameWidth), 0, null);
 
     // Loop that runs the thread, allows for it to sleep and start and ensures
     // proper frame speed
@@ -84,12 +95,20 @@ public class GameWindow extends JPanel implements Runnable {
         Particle initial_particle = new Particle(new Vector2(initialXPos, initialYPos),new Vector2(0,0), 0);
         particles.add(initial_particle);
 
-        // Creating a bunch of random particles with adjustment to zoom
-        // for (int i = 0; i < MaxParticle; i++) {
-        //     double randomXPos =  rand.nextDouble(0 + gameWidth*zoomXOffset/2, gameWidth / zoomX - gameWidth*zoomXOffset/2); // gameWidth/zoomX / 2 ; (For Center)
-        //     double randomYPos =  rand.nextDouble(0 + gameHeight*zoomYOffset/2, gameHeight / zoomY - gameHeight*zoomYOffset/2); // gameHeight/zoomY / 2 ; (For Center)
-        //     particles.add(new Particle(new Vector2(randomXPos, randomYPos),new Vector2(0,0), 5));
-        // }
+        //Creating a bunch of random particles with adjustment to zoom
+        for (int i = 0; i < MaxParticle; i++) {
+            
+            double randomXPos =  rand.nextDouble(0 + gameWidth*zoomXOffset/2, gameWidth / zoomX - gameWidth*zoomXOffset/2); // gameWidth/zoomX / 2 ; (For Center)
+            double randomYPos =  rand.nextDouble(0 + gameHeight*zoomYOffset/2, gameHeight / zoomY - gameHeight*zoomYOffset/2); // gameHeight/zoomY / 2 ; (For Center)
+            
+            if (rand.nextInt(0,100) <= percent_uranium_235){
+                particles.add(new Particle(new Vector2(randomXPos, randomYPos),randomVector(0.1), 0));
+            }
+            else {
+                particles.add(new Particle(new Vector2(randomXPos, randomYPos),randomVector(0.1), 1));
+            }
+        }    
+        
 
         // Managing updates and FPS
         double drawInterval = 1000000000 / FPS;
@@ -114,12 +133,22 @@ public class GameWindow extends JPanel implements Runnable {
         }
     }
 
+    public Vector2 randomVector(double gSpeed){
+        Random rand = new Random();
+        double randomXVelo = rand.nextInt(-10,10);
+        double randomYVelo = rand.nextInt(-10,10);
+        Vector2 gVelo = new Vector2(randomXVelo, randomYVelo);
+        gVelo = gVelo.normalize().returnMultiply(gSpeed);
+        return gVelo; 
+    }
+
     public void update() {
-        ;
+        QuadTree = new Branch(new Rectangle2D.Double(0,0,gameHeight/zoomX,gameWidth/zoomY), 0, null);
     }
 
     // Function that paints the updated version of the frame {FPS} times a second.
     public void paintComponent(Graphics g) {
+
         
         // Quick definition of varibles to use with the G2D library
         super.paintComponent(g);
@@ -132,12 +161,43 @@ public class GameWindow extends JPanel implements Runnable {
 
         for (Particle p : particles) {
             p.update(deltaTime);
-            graphics.setColor((Color) p.color);
             if(!p.collided){
+                graphics.setColor((Color) p.color);
+                QuadTree.addPoint(p); 
                 graphics.fill((Shape) p.getParticle());
             }
-        }
+            if(p.currentPos.x < 0 - 1 || p.currentPos.x > gameWidth/zoomX + 1){
+                oldParticles.add(p);
+            }
+            if(p.currentPos.y < 0 - 1|| p.currentPos.y > gameHeight/zoomY + 1){
+                oldParticles.add(p);
+            }
+            if(p.self[0].equals("Ba-141")){
+                //p.velocity.display();
+            }
 
+            //Slider
+            //graphics.drawRect(slider_initial_x, slider_y, slider_length, 3);
+            //graphics.drawRect(slider_x, slider_y, slider_width, slider_height);
+
+            //p.currentPos.display();
+        }
+        for (Particle p : oldParticles){
+            if(p != null){
+                particles.remove(p);
+            }
+        }
+        for (Particle p : newParticles){
+            if(p != null){
+                particles.add(p);
+            }
+        }
+        //hehehehehahahahahehehehehahahahehahehahahwhehehahahehahehahehahewhehahehahehahehahehahehahehaheheheheheheheheheheheheheheheheheahahahahahehehehehahahahahehehehehehehehahahahahehehehehahahehehahehehahehehahehehahshshaehashehasehashehasehashehasehasheahsehasheahsehasehasehahsehasehasheasehasehasehasehaseahsehasehasehasehasehasehasehasehaseh
+        newParticles.clear();
+        oldParticles.clear();
+
+        //QuadTree.displayBranch(graphics);
+        
         graphics.setTransform(oldTransform); // Putting the locations of the objects to what they should be post zoom.
 
         graphics.dispose();
